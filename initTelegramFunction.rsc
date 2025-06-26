@@ -11,7 +11,6 @@
         :local char [:pick $input $i]
         :if ($char = " ") do={ :set char "%20" }
         :if ($char = "!") do={ :set char "%21" }
-        :if ($char = "\"") do={ :set char "%22" }
         :if ($char = "&") do={ :set char "%26" }
         :if ($char = "'") do={ :set char "%27" }
         :if ($char = "(") do={ :set char "%28" }
