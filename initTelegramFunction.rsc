@@ -1,12 +1,14 @@
-:global token "SEU_BOT_TOKEN_AQUI"
-:global chatId "SEU_CHAT_ID_AQUI"
+:global token
+:global chatId
+
+:if (0$token = 0) do={set token ""}
+:if (0$chatId = 0) do={set chatId ""}
 
 :global urlEncode do={
     :local input [:tostr $1]
     :local encoded ""
     :for i from=0 to=([:len $input] - 1) do={
         :local char [:pick $input $i]
-
         :if ($char = " ") do={ :set char "%20" }
         :if ($char = "!") do={ :set char "%21" }
         :if ($char = "\"") do={ :set char "%22" }
