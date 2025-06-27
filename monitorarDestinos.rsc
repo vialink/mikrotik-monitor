@@ -26,16 +26,18 @@
 :global urlTest
 :global telegramSend
 
-:local total 0
-:local falhas 0
+:local totalIcmp 0
+:local totalHttps 0
+:local falhasIcmp 0
+:local falhasHttps 0
 
 :put "Iniciando testes de ICMP"
 :foreach h in=$icmpHosts do={
-    :set total ($total + 1)
+    :set totalIcmp ($totalIcmp + 1)
     :put ("Testando " . $h)
     :local result [/ping $h src-address=$srcAddr count=2 interval=500ms]
     :if ($result = 0) do={
-        :set falhas ($falhas + 1)
+        :set falhasIcmp ($falhasIcmp + 1)
         :set ($falhaStatus->$h) "ICMP"
         :if ([:typeof ($falhaCiclos->$h)] = "num") do={
             :set ($falhaCiclos->$h) ($falhaCiclos->$h + 1)
@@ -44,12 +46,12 @@
         }
         :if (($falhaCiclos->$h) = 1) do={
             :put ("- Falha em " . $h . " via ICMP iniciada.")
-            $telegramSend ("- Falha em " . $h . " via ICMP iniciada.")
+            $telegramSend ("--> Falha em " . $h . " via ICMP iniciada.")
         }
     } else={
         :if (([:typeof ($falhaStatus->$h)] = "str") && ($falhaStatus->$h != "")) do={
-            :put ("- " . $h . " via ICMP voltou ao normal depois " . $falhaCiclos->$h . " ciclos.")
-            $telegramSend ("- " . $h . " via ICMP voltou ao normal depois " . $falhaCiclos->$h . " ciclos.")
+            :put ("--> " . $h . " via ICMP voltou ao normal depois " . $falhaCiclos->$h . " ciclos.")
+            $telegramSend ("--> " . $h . " via ICMP voltou ao normal depois " . $falhaCiclos->$h . " ciclos.")
         }
         :set ($falhaStatus->$h) ""
         :set ($falhaCiclos->$h) 0
@@ -58,7 +60,7 @@
 
 :put "Iniciando testes de HTTPS"
 :foreach h in=$httpsHosts do={
-    :set total ($total + 1)
+    :set totalHttps ($totalHttps + 1)
     :local url ("https://" . $h)
     :put ("Testando " . $url)
     :do {
@@ -67,14 +69,14 @@
         if ($result = 1) do={
             :put "Teste ok"
             :if (([:typeof ($falhaStatus->$h)] = "str") && ($falhaStatus->$h != "")) do={
-                :put ("+ h" . " via HTTPS voltou ao normal depois de " . $falha->$h . "ciclos.")
-                $telegramSend ("+ $h" . " via HTTPS voltou ao normal depois de " . $falhaCiclos->$h . " ciclos.")
+                :put (">> h" . " via HTTPS voltou ao normal depois de " . $falha->$h . "ciclos.")
+                $telegramSend (">> $h" . " via HTTPS voltou ao normal depois de " . $falhaCiclos->$h . " ciclos.")
             }
             :set ($falhaStatus->$h) ""
             :set ($falhaCiclos->$h) 0
         } else={
             :put "Problema"
-            :set falhas ($falhas + 1)
+            :set falhasHttps ($falhasHttps + 1)
             :set ($falhaStatus->$h) "HTTPS"
             :if ([:typeof ($falhaCiclos->$h)] = "num") do={
                 :set ($falhaCiclos->$h) ($falhaCiclos->$h + 1)
@@ -82,8 +84,8 @@
                 :set ($falhaCiclos->$h) 1
             }
             :if (($falhaCiclos->$h) = 1) do={
-                :put ("- Falha em " . $h . " via HTTPS iniciada.")
-                $telegramSend ("- Falha em " . $h . " via HTTPS iniciada.")
+                :put ("--> Falha em " . $h . " via HTTPS iniciada.")
+                $telegramSend ("--> Falha em " . $h . " via HTTPS iniciada.")
             }
         }
     } on-error={
@@ -91,19 +93,21 @@
     }
 }
 
-:if ($total = 0) do={ :set total 1 }
-:local disponibilidade (1 - ($falhas / $total))
+:if ($totalIcmp = 0) do={ :set totalIcmp 1 }
+:if ($totalHttps = 0) do={ :set totalHttps 1 }
+:local disponibilidadeIcmp (1 - ($falhasIcmp / $totalIcmp))
+:local disponibilidadeHttps (1 - ($falhasHttps / $totalHttps))
 
 :if ($disponibilidade < $minDisponibilidade) do={
     :if ($falhaGlobalDesde = "") do={
         :set falhaGlobalDesde [/system clock get time]
-        :put ("-- Queda global iniciada as " . $falhaGlobalDesde . ". Disponibilidade: " . ($disponibilidade * 100) . "%")
-        $telegramSend ("-- Queda global iniciada as " . $falhaGlobalDesde . ". Disponibilidade: " . ($disponibilidade * 100) . "%")
+        :put ("--> Queda global iniciada as " . $falhaGlobalDesde . ". Disponibilidade: " . ($disponibilidade * 100) . "%")
+        $telegramSend ("--> Queda global iniciada as " . $falhaGlobalDesde . ". Disponibilidade: " . ($disponibilidade * 100) . "%")
     }
 } else={
     :if ($falhaGlobalDesde != "") do={
-        :put ("++ Queda global encerrada. Tempo de falha: " . $falhaGlobalDesde . " até " . [/system clock get time])
-        $telegramSend ("++ Queda global encerrada. Tempo de falha: " . $falhaGlobalDesde . " até " . [/system clock get time])
+        :put (">> Queda global encerrada. Tempo de falha: " . $falhaGlobalDesde . " até " . [/system clock get time])
+        $telegramSend (">> Queda global encerrada. Tempo de falha: " . $falhaGlobalDesde . " até " . [/system clock get time])
         :set falhaGlobalDesde ""
     }
 }

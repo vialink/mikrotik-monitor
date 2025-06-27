@@ -1,8 +1,10 @@
 :global token
 :global chatId
+:global srcAddr
 
 :if (0$token = 0) do={set token ""}
 :if (0$chatId = 0) do={set chatId ""}
+:if (0$srcAddr = 0) do={set srcAddr ""}
 
 :global urlEncode do={
     :local input [:tostr $1]
@@ -58,10 +60,14 @@
 }
 
 :global telegramSend do={
-    :local rawMsg [:tostr $1]
-    :local msg [:pick $rawMsg 0 4000]
-    :local encodedMsg [$urlEncode $msg]
+    :put ("1 = " . $1)
+    :global srcAddr
+    :put ("srcAddr = " . $srcAddr)
+    :local msg [:tostr $1]
+    :put ("msg = " . $msg)
+    :global token
+    :global chatId
 
     :put ("Enviando mensagem")
-    /tool fetch url=("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chatId . "&text=" . $encodedMsg) keep-result=no
+    /tool fetch url=("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chatId . "&text=" . $msg) keep-result=no
 }
