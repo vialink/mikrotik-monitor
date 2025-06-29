@@ -13,6 +13,10 @@ quit
 END_FTP
 }
 
+run_script() {
+    ssh -p $PORT $HOST "/system/script/run $1"
+}
+
 import_file() {
     echo "Importando $1"
     ssh -p $PORT $HOST "/system/script/remove $BASENAME"
@@ -33,3 +37,5 @@ for f in $FILES; do
     transfer_file $PREFIX$f
     import_file $PREFIX$f
 done
+
+run_script "initTelegramFunction"

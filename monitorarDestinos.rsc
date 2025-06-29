@@ -1,31 +1,6 @@
 :global srcAddr "187.45.173.50"
 :global minDisponibilidade "0.5"
-:global simbolOk "\E2\9C\85"
-:global simbolFail "\E2\9D\8C"
-:global simbolWarn "\E2\9A\A0\EF\B8\8F"
-:global simbolDown "\F0\9F\94\B4"
-:global simbolUp "\F0\9F\9F\A2"
-:global simbolUnstable "\F0\9F\9F\A1"
-:global simbolActive "\F0\9F\94\B5"
-:global simbolUnknown "\E2\9A\AA"
-:global simbolWaiting "\E2\8F\B3"
-:global simbolRetry "\F0\9F\94\81"
-:global simbolMonitoring "\F0\9F\94\82"
-:global simbolIncident "\F0\9F\9A\A8"
-:global simbolBoom "\F0\9F\92\A5"
-:global simbolBomb "\F0\9F\92\A3"
-:global simbolFire "\F0\9F\94\A5"
-:global simbolBlocked "\F0\9F\9B\91"
-:global simbolRadio "\F0\9F\93\A1"
-:global simbolSignal "\F0\9F\93\B6"
-:global simbolInet "\F0\9F\8C\90"
-:global simbolPower "\F0\9F\94\8C"
-:global simbolBattery "\F0\9F\94\8E"
-:global simbolBatteryCharging "\F0\9F\94\8D"
-:global simbolBatteryLow "\F0\9F\94\8B"
-:global simbolBatteryMedium "\F0\9F\94\8C"
-:global simbolBatteryHigh "\F0\9F\94\8D"
-:global simbolBatteryFull "\F0\9F\94\8E"
+:global simbol
 
 :global icmpHosts
 :set icmpHosts [:toarray ""]
@@ -71,12 +46,12 @@
         }
         :if (($falhaCiclos->$h) = 1) do={
             :put ("- Falha em " . $h . " via ICMP iniciada.")
-            $telegramSend ($simbolWarn . "--> Falha em " . $h . " via ICMP iniciada.")
+            $telegramSend ($simbol->"Warn" . "Falha em " . $h . " via ICMP iniciada.")
         }
     } else={
         :if (([:typeof ($falhaStatus->$h)] = "str") && ($falhaStatus->$h != "")) do={
-            :put ("--> " . $h . " via ICMP voltou ao normal depois " . $falhaCiclos->$h . " ciclos.")
-            $telegramSend ($simbolWarn . "--> " . $h . " via ICMP voltou ao normal depois " . $falhaCiclos->$h . " ciclos.")
+            :put ("" . $h . " via ICMP voltou ao normal depois " . $falhaCiclos->$h . " ciclos.")
+            $telegramSend ($simbol->"Warn" . "" . $h . " via ICMP voltou ao normal depois " . $falhaCiclos->$h . " ciclos.")
         }
         :set ($falhaStatus->$h) ""
         :set ($falhaCiclos->$h) 0
@@ -95,7 +70,7 @@
             :put "Teste ok"
             :if (([:typeof ($falhaStatus->$h)] = "str") && ($falhaStatus->$h != "")) do={
                 :put (">> h" . " via HTTPS voltou ao normal depois de " . $falha->$h . "ciclos.")
-                $telegramSend ($simbolWarn . ">> $h" . " via HTTPS voltou ao normal depois de " . $falhaCiclos->$h . " ciclos.")
+                $telegramSend ($simbol->"Ok" . ">> $h" . " via HTTPS voltou ao normal depois de " . $falhaCiclos->$h . " ciclos.")
             }
             :set ($falhaStatus->$h) ""
             :set ($falhaCiclos->$h) 0
@@ -109,8 +84,8 @@
                 :set ($falhaCiclos->$h) 1
             }
             :if (($falhaCiclos->$h) = 1) do={
-                :put ($simbolWarn . "--> Falha em " . $h . " via HTTPS iniciada.")
-                $telegramSend ($simbolWarn . "--> Falha em " . $h . " via HTTPS iniciada.")
+                :put ($simbolWarn . "Falha em " . $h . " via HTTPS iniciada.")
+                $telegramSend ($simbolWarn . "Falha em " . $h . " via HTTPS iniciada.")
             }
         }
     } on-error={
@@ -126,13 +101,13 @@
 :if ($disponibilidade < $minDisponibilidade) do={
     :if ($falhaGlobalDesde = "") do={
         :set falhaGlobalDesde [/system clock get time]
-        :put ("--> Queda global iniciada as " . $falhaGlobalDesde . ". Disponibilidade: " . ($disponibilidade * 100) . "%")
-        $telegramSend ($simbolWarn . "--> Queda global iniciada as " . $falhaGlobalDesde . ". Disponibilidade: " . ($disponibilidade * 100) . "%")
+        :put ("Queda global iniciada as " . $falhaGlobalDesde . ". Disponibilidade: " . ($disponibilidade * 100) . "%")
+        $telegramSend ($simbol->"Fail" . "Queda global iniciada as " . $falhaGlobalDesde . ". Disponibilidade: " . ($disponibilidade * 100) . "%")
     }
 } else={
     :if ($falhaGlobalDesde != "") do={
         :put (">> Queda global encerrada. Tempo de falha: " . $falhaGlobalDesde . " até " . [/system clock get time])
-        $telegramSend ("$simbolWarn . >> Queda global encerrada. Tempo de falha: " . $falhaGlobalDesde . " até " . [/system clock get time])
+        $telegramSend ($simbol->"Ok" . ">> Queda global encerrada. Tempo de falha: " . $falhaGlobalDesde . " até " . [/system clock get time])
         :set falhaGlobalDesde ""
     }
 }

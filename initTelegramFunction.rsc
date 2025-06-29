@@ -6,65 +6,33 @@
 :if (0$chatId = 0) do={set chatId ""}
 :if (0$srcAddr = 0) do={set srcAddr ""}
 
-:global createSimbols do={
-    :global simbolOk "\E2\9C\85"
-    :global simbolFail "\E2\9D\8C"
-    :global simbolWarn "\E2\9A\A0\EF\B8\8F"
-    :global simbolDown "\F0\9F\94\B4"
-    :global simbolUp "\F0\9F\9F\A2"
-    :global simbolUnstable "\F0\9F\9F\A1"
-    :global simbolActive "\F0\9F\94\B5"
-    :global simbolUnknown "\E2\9A\AA"
-    :global simbolWaiting "\E2\8F\B3"
-    :global simbolRetry "\F0\9F\94\81"
-    :global simbolMonitoring "\F0\9F\94\82"
-    :global simbolIncident "\F0\9F\9A\A8"
-    :global simbolBoom "\F0\9F\92\A5"
-    :global simbolBomb "\F0\9F\92\A3"
-    :global simbolFire "\F0\9F\94\A5"
-    :global simbolBlocked "\F0\9F\9B\91"
-    :global simbolRadio "\F0\9F\93\A1"
-    :global simbolSignal "\F0\9F\93\B6"
-    :global simbolInet "\F0\9F\8C\90"
-    :global simbolPower "\F0\9F\94\8C"
-    :global simbolBattery "\F0\9F\94\8E"
-    :global simbolBatteryCharging "\F0\9F\94\8D"
-    :global simbolBatteryLow "\F0\9F\94\8B"
-    :global simbolBatteryMedium "\F0\9F\94\8C"
-    :global simbolBatteryHigh "\F0\9F\94\8D"
-    :global simbolBatteryFull "\F0\9F\94\8E"
-}
-
-:global importSimbols do={
-    :global simbolOk
-    :global simbolFail
-    :global simbolWarn
-    :global simbolDown
-    :global simbolUp
-    :global simbolUnstable
-    :global simbolActive
-    :global simbolUnknown
-    :global simbolWaiting
-    :global simbolRetry
-    :global simbolMonitoring
-    :global simbolIncident
-    :global simbolBoom
-    :global simbolBomb
-    :global simbolFire
-    :global simbolBlocked
-    :global simbolRadio
-    :global simbolSignal
-    :global simbolInet
-    :global simbolPower
-    :global simbolBattery
-    :global simbolBatteryCharging
-    :global simbolBatteryLow
-    :global simbolBatteryMedium
-    :global simbolBatteryHigh
-    :global simbolBatteryFull
-}
-
-$createSimbols
+:global simbol {""}
+:set ($simbol->"Ok") "\E2\9C\85" 
+:set ($simbol->"Fail") "\E2\9D\8C"
+:set ($simbol->"Warn") "\E2\9A\A0\EF\B8\8F"
+:set ($simbol->"Down") "\F0\9F\94\B4"
+:set ($simbol->"Up") "\F0\9F\9F\A2"
+:set ($simbol->"Unstable") "\F0\9F\9F\A1"
+:set ($simbol->"Active") "\F0\9F\94\B5"
+:set ($simbol->"Unknown") "\E2\9A\AA"
+:set ($simbol->"Waiting") "\E2\8F\B3"
+:set ($simbol->"Retry") "\F0\9F\94\81"
+:set ($simbol->"Monitoring") "\F0\9F\94\82"
+:set ($simbol->"Incident") "\F0\9F\9A\A8"
+:set ($simbol->"Boom") "\F0\9F\92\A5"
+:set ($simbol->"Bomb") "\F0\9F\92\A3"
+:set ($simbol->"Fire") "\F0\9F\94\A5"
+:set ($simbol->"Blocked") "\F0\9F\9B\91"
+:set ($simbol->"Radio") "\F0\9F\93\A1"
+:set ($simbol->"Signal") "\F0\9F\93\B6"
+:set ($simbol->"Inet") "\F0\9F\8C\90"
+:set ($simbol->"Power") "\F0\9F\94\8C"
+:set ($simbol->"Battery") "\F0\9F\94\8E"
+:set ($simbol->"BatteryCharging") "\F0\9F\94\8D"
+:set ($simbol->"BatteryLow") "\F0\9F\94\8B"
+:set ($simbol->"BatteryMedium") "\F0\9F\94\8C"
+:set ($simbol->"BatteryHigh") "\F0\9F\94\8D"
+:set ($simbol->"BatteryFull") "\F0\9F\94\8E"
 
 :global urlEncode do={
     :local input [:tostr $1]
@@ -127,8 +95,7 @@ $createSimbols
     :put ("msg = " . $msg)
     :global token
     :global chatId
-    :global importSimbols
-
+    :global simbol
     :put ("Enviando mensagem")
-    /tool fetch url=("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chatId . "&text=" . $msg) keep-result=no
+    /tool fetch url=("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chatId . "&text="  . $msg) keep-result=no
 }
