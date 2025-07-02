@@ -59,16 +59,20 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
 
 :foreach i in=$icmpHosts do={
     :put ("Testando " . ($i->"ip"))
-    :local result [/ping ($i->"ip") src-address=$srcAddr count=2 interval=500ms]
+    :local result
+    :set result [/ping ($i->"ip") src-address=$srcAddr count=2 interval=500ms]
+    :put ("result = " . $result)
     :if ($result = 0) do={
         :set totalIcmpDown ($totalIcmpDown + 1)
         :set ($i->"downCicles") ($i->"downCicles" + 1)
+        :put ("host: " . $i->"ip" . " downCicles: " . $i->"downCicles")
+        :put ("icmpHosts = " . [:tostr $icmpHosts])
         :if (($i->"downCicles") = 1) do={
-            :put ("Falha em " . $i->"ip" . " via ICMP iniciada.")
+            :put ("MSG: Falha em " . $i->"ip" . " via ICMP iniciada.")
             $telegramSend ($simbol->"Warn" . "Falha em " . $i->"ip" . " via ICMP iniciada.")
         } else={
             :if (($i->"downCicles") > 1) do={
-                :put ("Falha em " . $i->"ip" . " via ICMP continua. " . $i->"downCicles" . " ciclos.")
+                :put ("MSG: Falha em " . $i->"ip" . " via ICMP continua. " . $i->"downCicles" . " ciclos.")
                 $telegramSend ($simbol->"Warn" . "Falha em " . $i->"ip" . " via ICMP continua. " . $i->"downCicles" . " ciclos.")
             }
         }
@@ -86,17 +90,18 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     :local url ("https://" . $h->"host")
     :put ("Testando " . $url)
     :do {
-        :local result [$urlTest $url]
+        :local result
+        :set result [$urlTest $url]
         :put ($url . " -> " . $result)
         if ($result = 0) do={
             :set totalHttpsDown ($totalHttpsDown + 1)
             :set ($h->"downCicles") ($h->"downCicles" + 1)
-            :put ("DownCicles: " . $h->"downCicles")
+            :put ("host: " . $h->"host" . " downCicles: " . $h->"downCicles")
             :if (($h->"downCicles") = 1) do={
                 :put ("Falha em " . $h->"host" . " via HTTPS iniciada.")
                 $telegramSend ($simbol->"Warn" . "Falha em " . $h->"host" . " via HTTPS iniciada.")
             } else={
-                :if ($result > 1    ) do={
+                :if (($h->"downCicles") > 1) do={
                     :put ("Falha em " . $h->"host" . " via HTTPS continua. " . $h->"downCicles" . " ciclos.")
                     $telegramSend ($simbol->"Warn" . "Falha em " . $h->"host" . " via HTTPS continua. " . $h->"downCicles" . " ciclos.")
                 }

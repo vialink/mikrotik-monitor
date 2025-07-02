@@ -88,11 +88,7 @@
 }
 
 :global telegramSend do={
-    :put ("1 = " . $1)
-    :global srcAddr
-    :put ("srcAddr = " . $srcAddr)
     :local msg [:tostr $1]
-    :put ("msg = " . $msg)
     :global token
     :global chatId
     :global simbol
