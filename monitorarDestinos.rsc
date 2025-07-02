@@ -30,7 +30,6 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
         {"ip"="10.100.10.62"; "downCicles"=0};\
         {"ip"="10.100.10.61"; "downCicles"=0}
     }
-    :put ("icmpHosts = " . [:tostr $icmpHosts])
 }
 
 :if ([typeof $httpsHosts] != "array" or [typeof $httpsHosts] = "nothing") do={
@@ -48,14 +47,11 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
         {"host"="www.tiktok.com"; "downCicles"=0};\
         {"host"="www.whatsapp.com"; "downCicles"=0}
     }
-    :put ("httpsHosts = " . [:tostr $httpsHosts])
 }
 
-:local totalIcmpDown 0
-:local totalHttpsDown 0
 
+:local totalIcmpDown 0
 :put "Iniciando testes de ICMP"
-:put ("icmpHosts = " . [:tostr $icmpHosts])
 
 :foreach i in=$icmpHosts do={
     :put ("Testando " . ($i->"ip"))
@@ -76,19 +72,29 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
                 $telegramSend ($simbol->"Warn" . "Falha em " . $i->"ip" . " via ICMP continua. " . $i->"downCicles" . " ciclos.")
             }
         }
+
     } else={
-        :if (($i->"downCicles") > 1) do={
-            :put ($i->"ip" . " via ICMP voltou ao normal depois " . $i->"downCicles" . " ciclos.")
-            $telegramSend ($simbol->"Ok" . $i->"ip" . " via ICMP voltou ao normal depois " . $i->"downCicles" . " ciclos.")
+        :if ($dc > 0) do={
+            :put ($ip . " via ICMP voltou ao normal depois de " . $dc . " ciclos.")
+            $telegramSend ($simbol->"Ok" . $ip . " via ICMP voltou ao normal depois de " . $dc . " ciclos.")
         }
-        :set ($i->"downCicles") 0
+        :set dc 0
     }
+
+    # Atualiza o item no array
+    :set ($icmpHosts->$i) {"ip"=$ip; "downCicles"=$dc}
 }
 
+:local totalHttpsDown 0
 :put "Iniciando testes de HTTPS"
-:foreach h in=$httpsHosts do={
-    :local url ("https://" . $h->"host")
-    :put ("Testando " . $url)
+
+:for i from=0 to=([:len $httpsHosts] - 1) do={
+    :local item ($httpsHosts->$i)
+    :local host ($item->"host")
+    :local dc ($item->"downCicles")
+    :put ("Testando " . $host)
+
+    :local url ("https://" . $host)
     :do {
         :local result
         :set result [$urlTest $url]
@@ -107,19 +113,20 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
                 }
             }
         } else={
-            :if ($h->"downCicles" > 1) do={
-                :put ($h->"host" . " via HTTPS voltou ao normal depois " . $h->"downCicles" . " ciclos.")
-                $telegramSend ($simbol->"Ok" . $h->"host" . " via HTTPS voltou ao normal depois " . $h->"downCicles" . " ciclos.")
+            :if ($dc > 0) do={
+                :put ($host . " via HTTPS voltou ao normal depois " . $dc . " ciclos.")
+                $telegramSend ($simbol->"Ok" . $host . " via HTTPS voltou ao normal depois " . $dc . " ciclos.")
             }
-            :set ($h->"downCicles") 0
+            :set dc 0
         }
     } on-error={
         :put ("Erro ao testar " $url)
     }
+    # Atualiza o item no array
+    :set ($httpsHosts->$i) {"host"=$host; "downCicles"=$dc}
 }
 
 :local disponibilidadeIcmp (1 - ($totalIcmpDown / [:len $icmpHosts]))
-:local disponibilidadeHttps (1 - ($totalHttpsDown / [:len $httpsHosts]))
 
 :if ($disponibilidadeIcmp < $minDisponibilidade) do={
     :set countIcmpGlobalDown ($countIcmpGlobalDown + 1)
@@ -137,6 +144,8 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     $telegramSend ($simbol->"Ok" . "Queda Global ICMP encerrada. Ciclos: " . $countIcmpGlobalDown)
     :set countIcmpGlobalDown 0
 }
+
+:local disponibilidadeHttps (1 - ($totalHttpsDown / [:len $httpsHosts]))
 
 :if ($disponibilidadeHttps < $minDisponibilidade) do={
     :set countHttpsGlobalDown ($countHttpsGlobalDown + 1)
@@ -156,6 +165,3 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
         :set countHttpsGlobalDown 0
     }
 }
-
-:put ("icmpHosts = " . [:tostr $icmpHosts])
-:put ("httpsHosts = " . [:tostr $httpsHosts])

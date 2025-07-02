@@ -92,6 +92,7 @@
     :global token
     :global chatId
     :global simbol
+    :local msg [:tostr $1]
     :put ("Enviando mensagem")
     /tool fetch url=("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chatId . "&text="  . $msg) keep-result=no
 }
