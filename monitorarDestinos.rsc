@@ -49,30 +49,33 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     }
 }
 
-
 :local totalIcmpDown 0
 :put "Iniciando testes de ICMP"
 
-:foreach i in=$icmpHosts do={
-    :put ("Testando " . ($i->"ip"))
+:for i from=0 to=([:len $icmpHosts] - 1) do={
+    :local item ($icmpHosts->$i)
+    :local ip ($item->"ip")
+    :local dc ($item->"downCicles")
+
+    :put ("Testando " . $ip)
     :local result
-    :set result [/ping ($i->"ip") src-address=$srcAddr count=2 interval=500ms]
+    :set result [/ping $ip src-address=$srcAddr count=2 interval=500ms]
+
     :put ("result = " . $result)
     :if ($result = 0) do={
         :set totalIcmpDown ($totalIcmpDown + 1)
-        :set ($i->"downCicles") ($i->"downCicles" + 1)
-        :put ("host: " . $i->"ip" . " downCicles: " . $i->"downCicles")
+        :set dc ($dc + 1)
+        :put ("ip: " . $ip . " downCicles: " . $dc)
         :put ("icmpHosts = " . [:tostr $icmpHosts])
-        :if (($i->"downCicles") = 1) do={
-            :put ("MSG: Falha em " . $i->"ip" . " via ICMP iniciada.")
-            $telegramSend ($simbol->"Warn" . "Falha em " . $i->"ip" . " via ICMP iniciada.")
+        :if ($dc = 1) do={
+            :put ("MSG: Falha em " . $ip . " via ICMP iniciada.")
+            $telegramSend ($simbol->"Warn" . "Falha em " . $ip . " via ICMP iniciada.")
         } else={
-            :if (($i->"downCicles") > 1) do={
-                :put ("MSG: Falha em " . $i->"ip" . " via ICMP continua. " . $i->"downCicles" . " ciclos.")
-                $telegramSend ($simbol->"Warn" . "Falha em " . $i->"ip" . " via ICMP continua. " . $i->"downCicles" . " ciclos.")
+            :if ($dc > 1) do={
+                :put ("MSG: Falha em " . $ip . " via ICMP continua. " . $dc . " ciclos.")
+                $telegramSend ($simbol->"Warn" . "Falha em " . $ip . " via ICMP continua. " . $dc . " ciclos.")
             }
         }
-
     } else={
         :if ($dc > 0) do={
             :put ($ip . " via ICMP voltou ao normal depois de " . $dc . " ciclos.")
@@ -83,6 +86,7 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
 
     # Atualiza o item no array
     :set ($icmpHosts->$i) {"ip"=$ip; "downCicles"=$dc}
+    :put ""
 }
 
 :local totalHttpsDown 0
@@ -92,24 +96,25 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     :local item ($httpsHosts->$i)
     :local host ($item->"host")
     :local dc ($item->"downCicles")
-    :put ("Testando " . $host)
 
+    :put ("Testando " . $host)
     :local url ("https://" . $host)
+
     :do {
         :local result
         :set result [$urlTest $url]
         :put ($url . " -> " . $result)
         if ($result = 0) do={
             :set totalHttpsDown ($totalHttpsDown + 1)
-            :set ($h->"downCicles") ($h->"downCicles" + 1)
-            :put ("host: " . $h->"host" . " downCicles: " . $h->"downCicles")
-            :if (($h->"downCicles") = 1) do={
-                :put ("Falha em " . $h->"host" . " via HTTPS iniciada.")
-                $telegramSend ($simbol->"Warn" . "Falha em " . $h->"host" . " via HTTPS iniciada.")
+            :set dc ($dc + 1)
+            :put ("host: " . $host . " downCicles: " . $dc)
+            :if ($dc = 1) do={
+                :put ("Falha em " . $host . " via HTTPS iniciada.")
+                $telegramSend ($simbol->"Warn" . "Falha em " . $host . " via HTTPS iniciada.")
             } else={
-                :if (($h->"downCicles") > 1) do={
-                    :put ("Falha em " . $h->"host" . " via HTTPS continua. " . $h->"downCicles" . " ciclos.")
-                    $telegramSend ($simbol->"Warn" . "Falha em " . $h->"host" . " via HTTPS continua. " . $h->"downCicles" . " ciclos.")
+                :if ($dc > 1) do={
+                    :put ("Falha em " . $host . " via HTTPS continua. " . $dc . " ciclos.")
+                    $telegramSend ($simbol->"Warn" . "Falha em " . $host . " via HTTPS continua. " . $dc . " ciclos.")
                 }
             }
         } else={
@@ -124,6 +129,7 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     }
     # Atualiza o item no array
     :set ($httpsHosts->$i) {"host"=$host; "downCicles"=$dc}
+    :put ""
 }
 
 :local disponibilidadeIcmp (1 - ($totalIcmpDown / [:len $icmpHosts]))
