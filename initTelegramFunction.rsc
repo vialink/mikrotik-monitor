@@ -39,6 +39,10 @@
 :set ($simbol->"PointUp") "\F0\9F\91\86"
 :set ($simbol->"PointDown") "\F0\9F\91\87"
 
+:global CR "%0D"
+:global LF "%0A"
+:global CRLF "%0D%0A"
+
 :global urlEncode do={
     :local input [:tostr $1]
     :local encoded ""

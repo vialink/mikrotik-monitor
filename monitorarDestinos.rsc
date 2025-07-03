@@ -75,7 +75,7 @@ $telegramSend ("".$l.$l.$l.$l.$l.$l."")
         } else={
             :if ($dc > 1) do={
                 :put ("Falha em " . $ip . " via ICMP continua." . $dc . " ciclos.")
-                $telegramSend ($simbol->"Warn" . "Falha em " . $ip . " via ICMP continua. " . $dc . " ciclos.")
+                $telegramSend ($simbol->"Warn" . "Falha em " . $ip . " via ICMP. " . $dc . " ciclos.")
             }
         }
     } else={
