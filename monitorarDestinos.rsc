@@ -20,15 +20,15 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     :put "Iniciando a variavel icmpHosts"
     :set icmpHosts [:toarray ""]
     :set icmpHosts  {\
-        {"ip"="172.56.54.1"; "downCicles"=0};\
-        {"ip"="1.1.1.1"; "downCicles"=0};\
-        {"ip"="208.67.222.222"; "downCicles"=0};\
-        {"ip"="8.8.4.4"; "downCicles"=0};\
-        {"ip"="54.94.33.36"; "downCicles"=0};\
-        {"ip"="8.8.8.8"; "downCicles"=0};\
-        {"ip"="186.192.83.12"; "downCicles"=0};\
-        {"ip"="10.100.10.62"; "downCicles"=0};\
-        {"ip"="10.100.10.61"; "downCicles"=0}
+        {"ip"="172.56.54.1"; "downCicles"=0}; \
+        {"ip"="1.1.1.1"; "downCicles"=0}; \
+        {"ip"="208.67.222.222"; "downCicles"=0}; \
+        {"ip"="8.8.4.4"; "downCicles"=0}; \
+        {"ip"="54.94.33.36"; "downCicles"=0}; \
+        {"ip"="8.8.8.8"; "downCicles"=0}; \
+        {"ip"="186.192.83.12"; "downCicles"=0}; \
+        {"ip"="10.100.10.62"; "downCicles"=0}; \
+        {"ip"="10.100.10.61"; "downCicles"=0} \
     }
 }
 
@@ -36,21 +36,24 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     :put "Iniciando a variavel httpsHosts"
     :set httpsHosts [:toarray ""]
     :set httpsHosts  {\
-        {"host"="www.globo.com"; "downCicles"=0};\
-        {"host"="www.uol.com.br"; "downCicles"=0};\
-        {"host"="www.google.com"; "downCicles"=0};\
-        {"host"="www.youtube.com"; "downCicles"=0};\
-        {"host"="www.facebook.com"; "downCicles"=0};\
-        {"host"="www.twitter.com"; "downCicles"=0};\
-        {"host"="www.instagram.com"; "downCicles"=0};\
-        {"host"="www.linkedin.com"; "downCicles"=0};\
-        {"host"="www.tiktok.com"; "downCicles"=0};\
-        {"host"="www.whatsapp.com"; "downCicles"=0}
+        {"host"="www.globo.com"; "downCicles"=0}; \
+        {"host"="www.uol.com.br"; "downCicles"=0}; \
+        {"host"="www.google.com"; "downCicles"=0}; \
+        {"host"="www.youtube.com"; "downCicles"=0}; \
+        {"host"="www.facebook.com"; "downCicles"=0}; \
+        {"host"="www.twitter.com"; "downCicles"=0}; \
+        {"host"="www.instagram.com"; "downCicles"=0}; \
+        {"host"="www.linkedin.com"; "downCicles"=0}; \
+        {"host"="www.tiktok.com"; "downCicles"=0}; \
+        {"host"="www.whatsapp.com"; "downCicles"=0} \
     }
 }
 
 :local totalIcmpDown 0
 :put "Iniciando testes de ICMP"
+
+:local l ($simbol->"LightBulb")
+$telegramSend ("".$l.$l.$l.$l.$l.$l."")
 
 :for i from=0 to=([:len $icmpHosts] - 1) do={
     :local item ($icmpHosts->$i)
@@ -66,13 +69,12 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
         :set totalIcmpDown ($totalIcmpDown + 1)
         :set dc ($dc + 1)
         :put ("ip: " . $ip . " downCicles: " . $dc)
-        :put ("icmpHosts = " . [:tostr $icmpHosts])
         :if ($dc = 1) do={
-            :put ("MSG: Falha em " . $ip . " via ICMP iniciada.")
+            :put ("Falha em " . $ip . " via ICMP iniciada.")
             $telegramSend ($simbol->"Warn" . "Falha em " . $ip . " via ICMP iniciada.")
         } else={
             :if ($dc > 1) do={
-                :put ("MSG: Falha em " . $ip . " via ICMP continua. " . $dc . " ciclos.")
+                :put ("Falha em " . $ip . " via ICMP continua." . $dc . " ciclos.")
                 $telegramSend ($simbol->"Warn" . "Falha em " . $ip . " via ICMP continua. " . $dc . " ciclos.")
             }
         }
@@ -109,18 +111,18 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
             :set dc ($dc + 1)
             :put ("host: " . $host . " downCicles: " . $dc)
             :if ($dc = 1) do={
-                :put ("Falha em " . $host . " via HTTPS iniciada.")
-                $telegramSend ($simbol->"Warn" . "Falha em " . $host . " via HTTPS iniciada.")
+                :put ("Falha em " . $host . " via https iniciada.")
+                $telegramSend ($simbol->"Warn" . "Falha em " . $host . " via https iniciada.")
             } else={
                 :if ($dc > 1) do={
-                    :put ("Falha em " . $host . " via HTTPS continua. " . $dc . " ciclos.")
-                    $telegramSend ($simbol->"Warn" . "Falha em " . $host . " via HTTPS continua. " . $dc . " ciclos.")
+                    :put ("Falha em " . $host . " via https continua: " . $dc . " Ciclos.")
+                    $telegramSend ($simbol->"Warn" . "Falha em " . $host . " via https continua: " . $dc . " Ciclos.")
                 }
             }
         } else={
             :if ($dc > 0) do={
-                :put ($host . " via HTTPS voltou ao normal depois " . $dc . " ciclos.")
-                $telegramSend ($simbol->"Ok" . $host . " via HTTPS voltou ao normal depois " . $dc . " ciclos.")
+                :put ($host . " via https voltou ao normal depois de " . $dc . " ciclos.")
+                $telegramSend ($simbol->"Ok" . $host . " via https voltou ao normal depois de " . $dc . " ciclos.")
             }
             :set dc 0
         }
@@ -141,13 +143,15 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
         $telegramSend ($simbol->"Fail" . "Queda Global ICMP iniciada. Disponibilidade: " . ($disponibilidadeIcmp * 100) . "%")
     } else={
         :if ($countIcmpGlobalDown > 1) do={
-            :put ("Queda Global ICMP continua. Disponibilidade: " . ($disponibilidadeIcmp * 100) . "%" . " Ciclos: " . $countIcmpGlobalDown)
-            $telegramSend ($simbol->"Fail" . "Queda Global ICMP continua. Disponibilidade: " . ($disponibilidadeIcmp * 100) . "%" . " Ciclos: " . $countIcmpGlobalDown)
+            :put ("Queda Global ICMP continua. Disponibilidade: " . ($disponibilidadeIcmp * 100) . "% Ciclos: " . $countIcmpGlobalDown)
+            $telegramSend ($simbol->"Fail" . "Queda Global ICMP continua. Disponibilidade: " . ($disponibilidadeIcmp * 100) . "% Ciclos: " . $countIcmpGlobalDown)
         }
     }
 } else={
-    :put ("Queda Global ICMP encerrada. Ciclos: " . $countIcmpGlobalDown)
-    $telegramSend ($simbol->"Ok" . "Queda Global ICMP encerrada. Ciclos: " . $countIcmpGlobalDown)
+    :if ($countIcmpGlobalDown > 0) do={
+        :put ("Queda Global ICMP encerrada. Ciclos: " . $countIcmpGlobalDown)
+        $telegramSend ($simbol->"Ok" . "Queda Global ICMP encerrada. Ciclos: " . $countIcmpGlobalDown)
+    }
     :set countIcmpGlobalDown 0
 }
 
@@ -156,18 +160,23 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
 :if ($disponibilidadeHttps < $minDisponibilidade) do={
     :set countHttpsGlobalDown ($countHttpsGlobalDown + 1)
     :if ($countHttpsGlobalDown = 1) do={
-        :put ("Queda Global HTTPS iniciada. Disponibilidade: " . ($disponibilidadeHttps * 100) . "%")
-        $telegramSend ($simbol->"Fail" . "Queda Global HTTPS iniciada. Disponibilidade: " . ($disponibilidadeHttps * 100) . "%")
+        :put ("Queda Global https iniciada. Disponibilidade: " . ($disponibilidadeHttps * 100) . "%")
+        $telegramSend ($simbol->"Fail" . "Queda Global https iniciada. Disponibilidade: " . ($disponibilidadeHttps * 100) . "%")
     } else={
         :if ($countHttpsGlobalDown > 1) do={
-            :put ("Queda Global HTTPS continua. Disponibilidade: " . ($disponibilidadeHttps * 100) . "%" . " Ciclos: " . $countHttpsGlobalDown)
-            $telegramSend ($simbol->"Fail" . "Queda Global HTTPS continua. Disponibilidade: " . ($disponibilidadeHttps * 100) . "%" . " Ciclos: " . $countHttpsGlobalDown)
+            :put ("Queda Global https continua. Disponibilidade: " . ($disponibilidadeHttps * 100) . "% . Ciclos: " . $countHttpsGlobalDown)
+            $telegramSend ($simbol->"Fail" . "Queda Global https continua. Disponibilidade: " . ($disponibilidadeHttps * 100) . "% . Ciclos: " . $countHttpsGlobalDown)
         }
     }
 } else={
     :if ($countHttpsGlobalDown > 1) do={
-        :put ("Queda Global HTTPS encerrada. Ciclos: " . $countHttpsGlobalDown)
-        $telegramSend ($simbol->"Ok" . "Queda Global HTTPS encerrada. Ciclos: " . $countHttpsGlobalDown)
+        :put ("Queda Global https encerrada. Ciclos: " . $countHttpsGlobalDown)
+        $telegramSend ($simbol->"Ok" . "Queda Global https encerrada. Ciclos: " . $countHttpsGlobalDown)
         :set countHttpsGlobalDown 0
     }
 }
+
+:put ("--> Disponibilidade ICMP: " . ($disponibilidadeIcmp * 100) . "% <--")
+:put ("--> Disponibilidade https: " . ($disponibilidadeHttps * 100) . "% <--")
+$telegramSend ($simbol->"PointRight" . " Disponibilidade ICMP: " . ($disponibilidadeIcmp * 100) . "% " . $simbol->"PointLeft")
+$telegramSend ($simbol->"PointRight" . " Disponibilidade https: " . ($disponibilidadeHttps * 100) . "% " . $simbol->"PointLeft")

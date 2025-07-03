@@ -33,6 +33,11 @@
 :set ($simbol->"BatteryMedium") "\F0\9F\94\8C"
 :set ($simbol->"BatteryHigh") "\F0\9F\94\8D"
 :set ($simbol->"BatteryFull") "\F0\9F\94\8E"
+:set ($simbol->"LightBulb") "\F0\9F\92\A1"
+:set ($simbol->"PointRight") "\F0\9F\91\89"
+:set ($simbol->"PointLeft") "\F0\9F\91\88"
+:set ($simbol->"PointUp") "\F0\9F\91\86"
+:set ($simbol->"PointDown") "\F0\9F\91\87"
 
 :global urlEncode do={
     :local input [:tostr $1]
@@ -92,7 +97,6 @@
     :global token
     :global chatId
     :global simbol
-    :local msg [:tostr $1]
-    :put ("Enviando mensagem")
+    :put ("Enviando mensagem" . $msg)
     /tool fetch url=("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chatId . "&text="  . $msg) keep-result=no
 }
