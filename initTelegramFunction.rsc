@@ -10,30 +10,8 @@
 :set ($simbol->"Ok") "\E2\9C\85" 
 :set ($simbol->"Fail") "\E2\9D\8C"
 :set ($simbol->"Warn") "\E2\9A\A0\EF\B8\8F"
-:set ($simbol->"Down") "\F0\9F\94\B4"
-:set ($simbol->"Up") "\F0\9F\9F\A2"
-:set ($simbol->"Unstable") "\F0\9F\9F\A1"
-:set ($simbol->"Active") "\F0\9F\94\B5"
-:set ($simbol->"Unknown") "\E2\9A\AA"
-:set ($simbol->"Waiting") "\E2\8F\B3"
-:set ($simbol->"Retry") "\F0\9F\94\81"
-:set ($simbol->"Monitoring") "\F0\9F\94\82"
-:set ($simbol->"Incident") "\F0\9F\9A\A8"
-:set ($simbol->"Boom") "\F0\9F\92\A5"
-:set ($simbol->"Bomb") "\F0\9F\92\A3"
-:set ($simbol->"Fire") "\F0\9F\94\A5"
-:set ($simbol->"Blocked") "\F0\9F\9B\91"
-:set ($simbol->"Radio") "\F0\9F\93\A1"
-:set ($simbol->"Signal") "\F0\9F\93\B6"
-:set ($simbol->"Inet") "\F0\9F\8C\90"
-:set ($simbol->"Power") "\F0\9F\94\8C"
-:set ($simbol->"Battery") "\F0\9F\94\8E"
-:set ($simbol->"BatteryCharging") "\F0\9F\94\8D"
-:set ($simbol->"BatteryLow") "\F0\9F\94\8B"
-:set ($simbol->"BatteryMedium") "\F0\9F\94\8C"
-:set ($simbol->"BatteryHigh") "\F0\9F\94\8D"
-:set ($simbol->"BatteryFull") "\F0\9F\94\8E"
-:set ($simbol->"LightBulb") "\F0\9F\92\A1"
+:set ($simbol->"Online") "\F0\9F\9F\A2"
+:set ($simbol->"Offline") "\F0\9F\94\B4"
 :set ($simbol->"PointRight") "\F0\9F\91\89"
 :set ($simbol->"PointLeft") "\F0\9F\91\88"
 :set ($simbol->"PointUp") "\F0\9F\91\86"
@@ -101,6 +79,5 @@
     :global token
     :global chatId
     :global simbol
-    :put ("Enviando mensagem" . $msg)
     /tool fetch url=("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chatId . "&text="  . $msg) keep-result=no
 }
