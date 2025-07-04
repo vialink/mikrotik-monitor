@@ -1,5 +1,7 @@
-:global srcAddr "187.45.173.50"
-:global minDisponibilidade "0.5"
+/system/script/run conf
+/system/script/run rc-local
+
+:global minDisponibilidade
 :global simbol
 :global urlTest
 :global telegramSend
@@ -7,12 +9,15 @@
 :global countHttpsGlobalDown 
 :global icmpHosts
 :global httpsHosts
+:global sendMessage
+:global srcAddr
+
 :local message ""
 :local name [/system identity get name]
 :local timeDate ([/system clock get time] . " " . [/system clock get date])
 
 :set message "-------------------------------%0A"
-:set message ("$message " . $name . " - " . $srcAddr . "%0A" . $timeDate . "%0A")
+:set message ($message . $name . " - " . $srcAddr . "%0A" . $timeDate . "%0A")
 :set message ($message . "-------------------------------%0A")
 
 if ([typeof $countIcmpGlobalDown] = "nothing") do={
@@ -23,38 +28,8 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     :set countHttpsGlobalDown 0
 }
 
-:if ([typeof $icmpHosts] != "array" or [typeof $icmpHosts] = "nothing") do={
-    :set icmpHosts [:toarray ""]
-    :set icmpHosts  {\
-        {"shortName"="registro.br"; "ip"="200.160.2.3"; "downCicles"=0}; \
-        {"shortName"="Cloudflare"; "ip"="1.1.1.1"; "downCicles"=0}; \
-        {"shortName"="OpenDNS"; "ip"="208.67.222.222"; "downCicles"=0}; \
-        {"shortName"="Google"; "ip"="8.8.4.4"; "downCicles"=0}; \
-        {"shortName"="Amazon"; "ip"="54.94.33.36"; "downCicles"=0}; \
-        {"shortName"="globo.com"; "ip"="186.192.83.12"; "downCicles"=0}; \
-        {"shortName"="MaisLink"; "ip"="10.100.10.62"; "downCicles"=0}; \
-        {"shortName"="MaisLink"; "ip"="10.100.10.61"; "downCicles"=0} \
-    }
-}
-
-:if ([typeof $httpsHosts] != "array" or [typeof $httpsHosts] = "nothing") do={
-    :set httpsHosts [:toarray ""]
-    :set httpsHosts  {\
-        {"host"="registro.br"; "downCicles"=0}; \
-        {"host"="www.globo.com"; "downCicles"=0}; \
-        {"host"="www.uol.com.br"; "downCicles"=0}; \
-        {"host"="www.google.com"; "downCicles"=0}; \
-        {"host"="www.youtube.com"; "downCicles"=0}; \
-        {"host"="www.facebook.com"; "downCicles"=0}; \
-        {"host"="www.instagram.com"; "downCicles"=0}; \
-        {"host"="www.linkedin.com"; "downCicles"=0}; \
-        {"host"="www.whatsapp.com"; "downCicles"=0} \
-        {"host"="www.whitehouse.gov"; "downCicles"=0} \
-    }
-}
-
 :local totalIcmpDown 0
-:set message ("$message" . "Testes de icmp%0A")
+:set message ($message . "Testes de icmp%0A")
 :for i from=0 to=([:len $icmpHosts] - 1) do={
     :local item ($icmpHosts->$i)
     :local ip ($item->"ip")
@@ -64,12 +39,16 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     :local result
     :set result [/ping $ip src-address=$srcAddr count=2 interval=500ms]
 
+    :if ((($result = 0) && ($dc = 0)) || (($result != 0) && ($dc >= 1))) do={
+        :set sendMessage 1
+    }
+
     :if ($result = 0) do={
         :set totalIcmpDown ($totalIcmpDown + 1)
         :set dc ($dc + 1)
-        :set message ("$message" . "    " . $simbol->"Offline" . $ip . " (" . $sn . ")" . " - " . $dc . " ciclo(s). %0A")
+        :set message ($message . "    " . $simbol->"Offline" . $ip . " (" . $sn . ")" . " - " . $dc . " ciclo(s). %0A")
     } else={
-        :set message ("$message" . "    " . $simbol->"Online" . $ip . " (" . $sn . ")" . "%0A")
+        :set message ($message . "    " . $simbol->"Online" . $ip . " (" . $sn . ")" . "%0A")
         :set dc 0
     }
     # Atualiza o item no array
@@ -78,23 +57,27 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
 :set message ($message . "%0A")
 
 :local totalHttpsDown 0
-:set message ("$message" . "Testes de https%0A")
+:set message ($message . "Testes de https%0A")
 :for i from=0 to=([:len $httpsHosts] - 1) do={
     :local item ($httpsHosts->$i)
     :local host ($item->"host")
     :local dc ($item->"downCicles")
+    :put ("host:" . $host . " dc: " . $dc)
 
     :local url ("https://" . $host)
 
     :do {
         :local result
         :set result [$urlTest $url]
-        if ($result = 0) do={
+        :if ((($result = 0) && ($dc = 0)) || (($result != 0) && ($dc >= 1))) do={
+            :set sendMessage 1
+        }
+        :if ($result = 0) do={
             :set totalHttpsDown ($totalHttpsDown + 1)
             :set dc ($dc + 1)
-            :set message ("$message" . "    " . $simbol->"Offline" . $host . " - " . $dc . " ciclo(s). %0A")
+            :set message ($message . "    " . $simbol->"Offline" . $host . " - " . $dc . " ciclo(s). %0A")
         } else={
-            :set message ("$message" . "    " . $simbol->"Online" . $host . "%0A")
+            :set message ($message . "    " . $simbol->"Online" . $host . "%0A")
             :set dc 0
         }
     } on-error={
@@ -125,4 +108,7 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
     :set countHttpsGlobalDown 0
 }
 
-$telegramSend ($message)
+if ($sendMessage = 1) do={
+    $telegramSend ($message)
+    :set sendMessage 0
+}

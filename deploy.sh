@@ -24,8 +24,7 @@ import_file() {
     ssh -p $PORT $HOST "/file/remove $1"
 }
 
-FILES="initTelegramFunction.rsc monitorarDestinos.rsc relatorioDiario.rsc"
-#FILES="initTelegramFunction.rsc"
+FILES="conf.rsc rc-local-sample.rsc functions.rsc monitoramento-composto.rsc scheduler.rsc"
 
 for f in $FILES; do
     echo "Fazendo deploy de $f"
@@ -38,4 +37,4 @@ for f in $FILES; do
     import_file $PREFIX$f
 done
 
-run_script "initTelegramFunction"
+run_script "conf"
