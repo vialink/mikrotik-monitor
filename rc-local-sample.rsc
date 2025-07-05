@@ -37,7 +37,7 @@
         {"host"="www.facebook.com"; "downCicles"=0}; \
         {"host"="www.instagram.com"; "downCicles"=0}; \
         {"host"="www.linkedin.com"; "downCicles"=0}; \
-        {"host"="www.whatsapp.com"; "downCicles"=0} \
+        {"host"="www.whatsapp.com"; "downCicles"=0}; \
         {"host"="www.whitehouse.gov"; "downCicles"=0} \
     }
 }

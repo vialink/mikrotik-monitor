@@ -3,7 +3,6 @@
     :global srcAddr
     :put $destUrl
     do {
-        :put ("/tool fetch url=$destUrl src-address=$srcAddr keep-result=no mode=https http-method=get")
         /tool fetch url=$destUrl src-address=$srcAddr keep-result=no mode=https http-method=get
     } on-error={
         :return 0
