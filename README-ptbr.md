@@ -165,13 +165,13 @@ Legenda dos símbolos:
 
 Se você preferir, pode usar o script `deploy.sh` para instalar o monitoramento no roteador Mikrotik. Seu uso depende da configuração do arquivo .env, e de acesso ao roteador Mikrotik via SSH com chave pública e de acesso também via ftp.
 
-### Pré-requisitos
+### Pré-requisitos para deploy.sh
 
 - Arquivo .env configurado
 - Acesso ao roteador Mikrotik via SSH com chave pública
 - Acesso ao roteador Mikrotik via ftp
 
-### Uso
+### Uso do deploy.sh
 
 1. Faça uma cópia do arquivo .env.example para .env
 2. Configure o arquivo .env com as variáveis necessárias

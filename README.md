@@ -165,13 +165,13 @@ Symbol legend:
 
 If you prefer, you can use the `deploy.sh` script to install the monitoring on your Mikrotik router. Its use depends on the .env file configuration, and access to the Mikrotik router via SSH with public key and also via ftp.
 
-### Prerequisites
+### Prerequisites for deploy.sh
 
 - Configured .env file
 - Access to Mikrotik router via SSH with public key
 - Access to Mikrotik router via ftp
 
-### Usage
+### Usage of deploy.sh
 
 1. Make a copy of the .env.example file to .env
 2. Configure the .env file with the necessary variables
