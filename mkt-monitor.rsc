@@ -1,5 +1,4 @@
 /system/script/run conf
-/system/script/run rc-local
 
 :global minAvailability
 :global simbol
@@ -11,6 +10,8 @@
 :global httpsHosts
 :global sendMessage
 :global srcAddr
+:global routerLog
+:global logString
 
 :local message ""
 :local name [/system identity get name]
@@ -47,9 +48,15 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
         :set totalIcmpDown ($totalIcmpDown + 1)
         :set dc ($dc + 1)
         :set message ($message . "    " . $simbol->"Offline" . $ip . " (" . $sn . ")" . " - " . $dc . " ciclo(s). %0A")
+        :if ($routerLog = 1) do={
+            :log error ($logString . "ICMP DOWN " . $ip . " (" . $sn . ")" . " - " . $dc . " ciclo(s).")
+        }
     } else={
         :set message ($message . "    " . $simbol->"Online" . $ip . " (" . $sn . ")" . "%0A")
         :set dc 0
+        :if ($routerLog = 1) do={
+            :log info ($logString . "ICMP UP " . $ip . " (" . $sn . ")")
+        }
     }
     :set ($icmpHosts->$i) {"shortName"=$sn; "ip"=$ip; "downCicles"=$dc}
 }
@@ -75,9 +82,15 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
             :set totalHttpsDown ($totalHttpsDown + 1)
             :set dc ($dc + 1)
             :set message ($message . "    " . $simbol->"Offline" . $host . " - " . $dc . " ciclo(s). %0A")
+            :if ($routerLog = 1) do={
+                :log error ($logString . "HTTPS DOWN " . $host . " - " . $dc . " ciclo(s).")
+            }
         } else={
             :set message ($message . "    " . $simbol->"Online" . $host . "%0A")
             :set dc 0
+            :if ($routerLog = 1) do={
+                :log info ($logString . "HTTPS UP " . $host)
+            }
         }
     } on-error={
         :put ("Error testing " $url)
@@ -91,9 +104,15 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
 :if ($disponibilidadeIcmp < $minAvailability) do={
     :set countIcmpGlobalDown ($countIcmpGlobalDown + 1)
     :set message ($message . $simbol->"PointRight" . " " . $simbol->"Fail" . " Global icmp fail " . $simbol->"PointLeft" . "%0A")
+    :if ($routerLog = 1) do={
+        :log error ($logString . "ICMP GLOBAL DOWN")
+    }
 } else={
     :set message ($message . $simbol->"PointRight" . " " . $simbol->"Ok" . " Global icmp ok " . $simbol->"PointLeft" . "%0A")
     :set countIcmpGlobalDown 0
+    :if ($routerLog = 1) do={
+        :log info ($logString . "ICMP GLOBAL OK")
+    }
 }
 
 :local disponibilidadeHttps (1 - ($totalHttpsDown / [:len $httpsHosts]))
@@ -101,9 +120,15 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
 :if ($disponibilidadeHttps < $minAvailability) do={
     :set countHttpsGlobalDown ($countHttpsGlobalDown + 1)
     :set message ($message . $simbol->"PointRight" . " " . $simbol->"Fail" . " Global https fail " . $simbol->"PointLeft" . "%0A")
+    :if ($routerLog = 1) do={
+        :log error ($logString . "HTTPS GLOBAL DOWN")
+    }
 } else={
     :set message ($message . $simbol->"PointRight" . " " . $simbol->"Ok" . " Global https ok " . $simbol->"PointLeft" . "%0A")
     :set countHttpsGlobalDown 0
+    :if ($routerLog = 1) do={
+        :log info ($logString . "HTTPS GLOBAL OK")
+    }
 }
 
 if ($sendMessage = 1) do={

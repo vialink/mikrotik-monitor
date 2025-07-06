@@ -1,11 +1,19 @@
 :global icmpHosts
 :global httpsHosts
 :global sendMessage
+:global routerLog
+:global minAvailability
+:global logString "mkt-monitor: "
 
+:if ([typeof $routerLog] = "nothing") do={
+    :set routerLog 1
+}
+:if ([typeof $minAvailability] = "nothing") do={
+    :set minAvailability "0.5"
+}
 :if ([typeof $sendMessage] = "nothing") do={
     :set sendMessage 1
 }
-
 :global simbol {""}
 :set ($simbol->"Ok") "\E2\9C\85" 
 :set ($simbol->"Fail") "\E2\9D\8C"
