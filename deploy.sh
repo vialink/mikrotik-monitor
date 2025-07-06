@@ -24,7 +24,7 @@ import_file() {
     ssh -p $PORT $HOST "/file/remove $1"
 }
 
-FILES="conf.rsc rc-local-sample.rsc functions.rsc monitoramento-composto.rsc scheduler.rsc"
+FILES="conf.rsc rc-local-sample.rsc functions.rsc mkt-monitor.rsc scheduler.rsc"
 
 for f in $FILES; do
     echo "Fazendo deploy de $f"
@@ -35,6 +35,7 @@ for f in $FILES; do
 
     transfer_file $PREFIX$f
     import_file $PREFIX$f
+    rm -f $PREFIX$f
 done
 
 run_script "conf"
