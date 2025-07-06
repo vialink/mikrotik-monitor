@@ -2,4 +2,4 @@
 .tmp
 .log
 NEW_*
-rc-local-maislink.rsc
+rc-local-*.rsc

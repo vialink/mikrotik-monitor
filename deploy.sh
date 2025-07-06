@@ -4,7 +4,7 @@ source .env
 PREFIX="NEW_"
 
 transfer_file() {
-    echo "Transferindo $1"
+    echo "Transfering $1"
     ncftp -u $USER -p $PASSWD $HOST <<END_FTP
 binary
 del $1
@@ -18,7 +18,7 @@ run_script() {
 }
 
 import_file() {
-    echo "Importando $1"
+    echo "Importing $1"
     ssh -p $PORT $HOST "/system/script/remove $BASENAME"
     ssh -p $PORT $HOST "/import $1"
     ssh -p $PORT $HOST "/file/remove $1"
@@ -27,7 +27,7 @@ import_file() {
 FILES="conf.rsc rc-local-sample.rsc functions.rsc mkt-monitor.rsc scheduler.rsc"
 
 for f in $FILES; do
-    echo "Fazendo deploy de $f"
+    echo "Deploying $f"
     BASENAME="${f%%.*}"
     echo "/system/script/add name=$BASENAME source=\"" >"$PREFIX$f"
     sed -e 's:\":\\":g' -e 's:\$:\\$:g' $f >>"$PREFIX$f"

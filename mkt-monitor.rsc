@@ -1,7 +1,7 @@
 /system/script/run conf
 /system/script/run rc-local
 
-:global minDisponibilidade
+:global minAvailability
 :global simbol
 :global urlTest
 :global telegramSend
@@ -29,7 +29,7 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
 }
 
 :local totalIcmpDown 0
-:set message ($message . "Testes de icmp%0A")
+:set message ($message . "Icmp testing%0A")
 :for i from=0 to=([:len $icmpHosts] - 1) do={
     :local item ($icmpHosts->$i)
     :local ip ($item->"ip")
@@ -51,13 +51,12 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
         :set message ($message . "    " . $simbol->"Online" . $ip . " (" . $sn . ")" . "%0A")
         :set dc 0
     }
-    # Atualiza o item no array
     :set ($icmpHosts->$i) {"shortName"=$sn; "ip"=$ip; "downCicles"=$dc}
 }
 :set message ($message . "%0A")
 
 :local totalHttpsDown 0
-:set message ($message . "Testes de https%0A")
+:set message ($message . "Https testing%0A")
 :for i from=0 to=([:len $httpsHosts] - 1) do={
     :local item ($httpsHosts->$i)
     :local host ($item->"host")
@@ -81,16 +80,15 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
             :set dc 0
         }
     } on-error={
-        :put ("Erro ao testar " $url)
+        :put ("Error testing " $url)
     }
-    # Atualiza o item no array
     :set ($httpsHosts->$i) {"host"=$host; "downCicles"=$dc}
 }
 :set message ($message . "%0A%0A")
 
 :local disponibilidadeIcmp (1 - ($totalIcmpDown / [:len $icmpHosts]))
 
-:if ($disponibilidadeIcmp < $minDisponibilidade) do={
+:if ($disponibilidadeIcmp < $minAvailability) do={
     :set countIcmpGlobalDown ($countIcmpGlobalDown + 1)
     :set message ($message . $simbol->"PointRight" . " " . $simbol->"Fail" . " Global icmp fail " . $simbol->"PointLeft" . "%0A")
 } else={
@@ -100,7 +98,7 @@ if ([typeof $countHttpsGlobalDown] = "nothing") do={
 
 :local disponibilidadeHttps (1 - ($totalHttpsDown / [:len $httpsHosts]))
 
-:if ($disponibilidadeHttps < $minDisponibilidade) do={
+:if ($disponibilidadeHttps < $minAvailability) do={
     :set countHttpsGlobalDown ($countHttpsGlobalDown + 1)
     :set message ($message . $simbol->"PointRight" . " " . $simbol->"Fail" . " Global https fail " . $simbol->"PointLeft" . "%0A")
 } else={

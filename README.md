@@ -1,46 +1,46 @@
 # Mikrotik Monitor
 
-Este sistema é um monitoramento de rede para roteadores Mikrotik que verifica o estado da rede a partir de testes usando ICMP e HTTPS, enviando notificações via Telegram quando ocorrem alterações no status, ou seja, quando um host muda de estado de online para offline ou vice-versa.
+This system is a network monitoring solution for Mikrotik routers that checks the network status through ICMP and HTTPS tests, sending notifications via Telegram when status changes occur, i.e., when a host changes state from online to offline or vice versa.
 
-A maior parte dos sistemas de monitoramento utiliza apenas ICMP para identificar o estado de um host, o que pode levar a falsos positivos em situações em que o ICMP é bloqueado por políticas de firewall ou por limitações de prioridade de tratamento desse tipo de pacote nos roteadores. Para evitar isso, este sistema testa tanto ICMP quanto HTTPS para diferentes conjuntos de destinos, o que garante que o estado da rede seja verificado de forma mais precisa.
+Most monitoring systems only use ICMP to identify a host's state, which can lead to false positives in situations where ICMP is blocked by firewall policies or due to packet priority handling limitations in routers. To avoid this, this system tests both ICMP and HTTPS for different sets of destinations, ensuring that the network state is verified more accurately.
 
-## Características
+## Features
 
-- Monitoramento de hosts via ICMP (ping)
-- Verificação de endpoints HTTPS
-- Notificações via Telegram
-- Configuração flexível de hosts e endpoints
-- Contagem de ciclos de indisponibilidade
-- Identificação do roteador por nome
+- Host monitoring via ICMP (ping)
+- HTTPS endpoint verification
+- Telegram notifications
+- Flexible host and endpoint configuration
+- Downtime cycle counting
+- Router identification by name
 
-## Pré-requisitos
+## Prerequisites
 
-- Roteador Mikrotik com RouterOS v6.45.9 ou superior
-- Bot do Telegram configurado (token e chat_id)
-- Acesso à internet no roteador
-- Permissões de escrita no sistema de arquivos do RouterOS
+- Mikrotik router with RouterOS v6.45.9 or higher
+- Configured Telegram bot (token and chat_id)
+- Internet access on the router
+- Write permissions on the RouterOS file system
 
-## Instalação e Configuração
+## Installation and Configuration
 
-1. Copie todos os arquivos `.rsc` para o seu roteador Mikrotik em /files.
-2. Importe todos os arquivos `.rsc` para scripts
-3. Renomeie o script `rc-local-sample` para `rc-local`
-4. Configure o script `rc-local` com suas configurações:
-   - Token do bot Telegram (variável `token`)
-   - Chat ID do Telegram (variável `chatId`)
-   - Endereço de origem para os testes (variável `srcAddr`)
-   - Hosts para monitoramento ICMP (variável `icmpHosts`)
-   - Endpoints HTTPS para monitoramento (variável `httpsHosts`)
-5. Configure o `scheduler.rsc` para definir a frequência das verificações
+1. Copy all `.rsc` files to your Mikrotik router in /files.
+2. Import all `.rsc` files as scripts
+3. Rename the `rc-local-sample` script to `rc-local`
+4. Configure the `rc-local` script with your settings:
+   - Telegram bot token (variable `token`)
+   - Telegram Chat ID (variable `chatId`)
+   - Source address for tests (variable `srcAddr`)
+   - Hosts for ICMP monitoring (variable `icmpHosts`)
+   - HTTPS endpoints for monitoring (variable `httpsHosts`)
+5. Configure `scheduler.rsc` to set the check frequency
 
-### Exemplo de Configuração (rc-local)
+### Configuration Example (rc-local)
 
 ```routeros
-:global token "SEU TOKEN"
-:global chatId "SEU CHAT ID"
-:global srcAddr "SEU ENDERECO IP"
+:global token "YOUR TOKEN"
+:global chatId "YOUR CHAT ID"
+:global srcAddr "YOUR IP ADDRESS"
 
-:global minDisponibilidade "0.5"
+:global minAvailability "0.5"
 
 :global icmpHosts
 
@@ -75,117 +75,117 @@ A maior parte dos sistemas de monitoramento utiliza apenas ICMP para identificar
 }
 ```
 
-**Nota:** *O sistema considera uma queda global quando mais do que 50% ("0.5") dos testes falham, tanto para ICMP quanto para HTTPS. Este fator pode ser alterado na variável `minDisponibilidade` no arquivo `rc-local.rsc`.*
+**Note:** *The system considers a global outage when more than 50% ("0.5") of the tests fail, for both ICMP and HTTPS. This factor can be modified in the `minAvailability` variable in the `rc-local.rsc` file.*
 
-### Exemplo de Configuração do Scheduler
+### Scheduler Configuration Example
 
 ```routeros
-# Em scheduler - Executa a cada 5 minutos
+# In scheduler - Runs every 5 minutes
 /system scheduler
 add name=monitor interval=5m on-event="system script run mkt-monitor"
 
-# Ou para execução a cada 1 minuto
+# Or for execution every 1 minute
 /system scheduler
 add name=monitor interval=1m on-event="system script run mkt-monitor"
 ```
 
-## Uso
+## Usage
 
-### Para execução manual, execute o script de monitoramento
+### For manual execution, run the monitoring script
 
 ```routeros
 /system/script/run mkt-monitor
 ```
 
-### Para execução automática, configure o agendador conforme necessário usando o `scheduler.rsc`
+### For automatic execution, configure the scheduler as needed using `scheduler.rsc`
 
-## Estrutura do Projeto
+## Project Structure
 
-- `conf.rsc`: Configurações do sistema
-- `functions.rsc`: Funções utilitárias (testes HTTPS, envio Telegram)
-- `mkt-monitor.rsc`: Script principal de monitoramento
-- `scheduler.rsc`: Configuração do agendador
-- `rc-local-sample.rsc`: Exemplo de configuração para inicialização
+- `conf.rsc`: System configurations
+- `functions.rsc`: Utility functions (HTTPS tests, Telegram sending)
+- `mkt-monitor.rsc`: Main monitoring script
+- `scheduler.rsc`: Scheduler configuration
+- `rc-local-sample.rsc`: Example configuration for initialization
 
-## Formato das Notificações
+## Notification Format
 
-As notificações enviadas pelo Telegram seguem o seguinte formato:
+Notifications sent via Telegram follow this format:
 
 ```text
 ------------------------------
-NOME_DO_ROTEADOR - IP_ORIGEM
-DATA_E_HORA
+ROUTER_NAME - SOURCE_IP
+DATE_AND_TIME
 ------------------------------
-Testes de ICMP
-    🔴 8.8.8.8 (DNS Google) - 3 ciclo(s)
+ICMP Tests
+    🔴 8.8.8.8 (DNS Google) - 3 cycle(s)
     🟢 1.1.1.1 (DNS Cloudflare) - Online
 
-Testes de HTTPS
-    ❌ https://api.example.com (API) - 1 ciclo(s)
+HTTPS Tests
+    ❌ https://api.example.com (API) - 1 cycle(s)
 ------------------------------
 ```
 
-Legenda dos símbolos:
+Symbol legend:
 
 - 🟢 Host online (ICMP)
 - 🔴 Host offline (ICMP)
-- ✅ Estado geral de acssso via HTTPS ok
-- ❌ Estado geral de acssso via HTTPS inacessível
-- ⚠️ Aviso de alteração de estado
+- ✅ General HTTPS access state ok
+- ❌ General HTTPS access state inaccessible
+- ⚠️ State change warning
 
 ## Troubleshooting
 
-### Problemas Comuns
+### Common Issues
 
-1. **Notificações não são enviadas**
+1. **Notifications are not being sent**
 
-   - Verifique se o token do Telegram está correto
-   - Confirme se o chat_id está correto
-   - Verifique se o roteador tem acesso à Internet
-   - Teste a conectividade com api.telegram.org
+   - Verify if the Telegram token is correct
+   - Confirm if the chat_id is correct
+   - Check if the router has Internet access
+   - Test connectivity with api.telegram.org
 
-2. **Falsos positivos em testes ICMP**
+2. **False positives in ICMP tests**
 
-   - Verifique se o endereço de origem (srcAddr) está correto
-   - Confirme se não há regras de firewall bloqueando ICMP
-   - Aumente o número de pings de teste em `mkt-monitor.rsc`
+   - Check if the source address (srcAddr) is correct
+   - Confirm if there are no firewall rules blocking ICMP
+   - Increase the number of test pings in `mkt-monitor.rsc`
 
-3. **Falsos positivos em testes HTTPS**
+3. **False positives in HTTPS tests**
 
-   - Verifique se o roteador tem DNS configurado corretamente
-   - Confirme se não há bloqueio de HTTPS no firewall
-   - Verifique se os certificados SSL dos endpoints são válidos
+   - Check if the router has DNS properly configured
+   - Confirm if there's no HTTPS blocking in the firewall
+   - Verify if the SSL certificates of the endpoints are valid
 
-4. **Scheduler não executa**
-   - Verifique se o script está presente no sistema
-   - Confirme se o nome do script no scheduler está correto
-   - Verifique os logs do sistema por erros
+4. **Scheduler not executing**
+   - Check if the script is present in the system
+   - Confirm if the script name in the scheduler is correct
+   - Check system logs for errors
 
-## Instalação Alternativa (via deploy.sh)
+## Alternative Installation (via deploy.sh)
 
-Se você preferir, pode usar o script `deploy.sh` para instalar o monitoramento no roteador Mikrotik. Seu uso depende da configuração do arquivo .env, e de acesso ao roteador Mikrotik via SSH com chave pública e de acesso também via ftp.
+If you prefer, you can use the `deploy.sh` script to install the monitoring on your Mikrotik router. Its use depends on the .env file configuration, and access to the Mikrotik router via SSH with public key and also via ftp.
 
-### Pré-requisitos
+### Prerequisites
 
-- Arquivo .env configurado
-- Acesso ao roteador Mikrotik via SSH com chave pública
-- Acesso ao roteador Mikrotik via ftp
+- Configured .env file
+- Access to Mikrotik router via SSH with public key
+- Access to Mikrotik router via ftp
 
-### Uso
+### Usage
 
-1. Faça uma cópia do arquivo .env.example para .env
-2. Configure o arquivo .env com as variáveis necessárias
-3. Execute o script `deploy.sh` para instalar o monitoramento no roteador Mikrotik.
+1. Make a copy of the .env.example file to .env
+2. Configure the .env file with the necessary variables
+3. Run the `deploy.sh` script to install the monitoring on the Mikrotik router.
 
-### Exemplo de configuração do arquivo `.env`
+### Example .env file configuration
 
 ```bash
-HOST="IP ou nome do roteador Mikrotik"
-USER="seu_usuario"
-PASSWD="sua_senha"
+HOST="IP or Mikrotik router name"
+USER="your_username"
+PASSWD="your_password"
 PORT="22"
 ```
 
-## Contribuição
+## Contributing
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
+Contributions are welcome! Feel free to open issues or submit pull requests.

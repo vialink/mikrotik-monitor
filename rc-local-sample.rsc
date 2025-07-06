@@ -2,7 +2,7 @@
 :global chatId ""
 :global srcAddr ""
 
-:global minDisponibilidade "0.5"
+:global minAvailability "0.5"
 
 :global icmpHosts
 
