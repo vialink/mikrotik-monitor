@@ -5,3 +5,4 @@
 NEW_*
 rc-local-*.rsc
 .vscode
+.DS_Store
